@@ -8,6 +8,7 @@
 <h1>Les limites de vitesse sont augmentes de 100 km/h supplementaires si la personne est sous l'effet de Cannabis</h1>
 <h1>Esteban est une grosse salope</h1>
 <h1> Les chinois ils sont tous moches c'est des versions ratées de nous</h1>
+<h1>Si mon fils il est trizo il finira dans le frigo</h1>
 
 <canvas id="canvas"></canvas>
   <script  src="./script.js"></script>
