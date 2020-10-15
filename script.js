@@ -1,146 +1,185 @@
-/*--------------------
-Utils
---------------------*/
-const mapRange = (a, b, c, d, e) => {
-  return (a - b) * (e - d) / (c - b) + d;
-};
-const lerp = (v0, v1, t) => {
-  return v0 * (1 - t) + v1 * t;
-};
-const random = (min, max) => min + Math.random() * (max - min);
-const sin = t => Math.sin(t);
-const cos = t => Math.cos(t);
-const PI = Math.PI;
-const TAO = PI * 2;
-const LOOP = 4;
+let menuBtn = document.querySelector("#menuBtn");
+let curs = document.querySelector(".cursor");
+let menuItems = document.querySelectorAll(".menu-item");
+let mainText = document.querySelector(".mainText");
 
+document.addEventListener("mousemove", (e) => {
+  let x = e.pageX;
+  let y = e.pageY;
+  curs.style.left = x - 15 + "px";
+  curs.style.top = y - 15 + "px";
+});
 
-/*--------------------
-                Raf
-                --------------------*/
-class Raf {
-  constructor() {
-    this.raf();
+// show hide menu animation
+let flag = true;
+menuBtn.addEventListener("click", () => {
+  flag = !flag;
+
+  if (!flag) {
+    gsap.to(".straight-line", {
+      width: 700,
+      duration: 0.3
+    });
+    gsap.to(".menu", {
+      display: "block",
+      duration: 0.3
+    });
+  } else {
+    gsap.to(".straight-line", {
+      width: 0,
+      duration: 0.2
+    });
+    gsap.to(".menu", {
+      display: "none",
+      duration: 0.2
+    });
+  }
+});
+
+// menu item click animation and changing maim title
+
+menuItems.forEach((item, index) => {
+  item.addEventListener("click", () => {
+    curs.classList.add("explosion");
+    setTimeout(function () {
+      curs.classList.remove("explosion");
+    }, 900);
+  });
+});
+
+// Taken from https://codepen.io/enesser/pen/jdenE
+
+function main() {
+  let scene = new THREE.Scene();
+  let camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  let webGLRenderer = new THREE.WebGLRenderer();
+  webGLRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
+  webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+  webGLRenderer.shadowMapEnabled = true;
+
+  camera.position.x = -30;
+  camera.position.y = 40;
+  camera.position.z = 50;
+  camera.lookAt(new THREE.Vector3(10, 0, 0));
+
+  document.querySelector("#WebGL-output").append(webGLRenderer.domElement);
+
+  let step = 0;
+
+  let knot;
+
+  let controls = new (function () {
+    this.radius = 40;
+    this.tube = 17;
+    this.radialSegments = 186;
+    this.tubularSegments = 4;
+    this.p = 9;
+    this.q = 1;
+    this.heightScale = 4;
+    this.asParticles = true;
+    this.rotate = true;
+
+    this.redraw = function () {
+      if (knot) scene.remove(knot);
+      let geom = new THREE.TorusKnotGeometry(
+        controls.radius,
+        controls.tube,
+        Math.round(controls.radialSegments),
+        Math.round(controls.tubularSegments),
+        Math.round(controls.p),
+        Math.round(controls.q),
+        controls.heightScale
+      );
+
+      if (controls.asParticles) {
+        knot = createParticleSystem(geom);
+      } else {
+        knot = createMesh(geom);
+      }
+
+      scene.add(knot);
+    };
+  })();
+
+  let gui = new dat.GUI();
+  gui.add(controls, "radius", 0, 40).onChange(controls.redraw);
+  gui.add(controls, "tube", 0, 40).onChange(controls.redraw);
+  gui.add(controls, "radialSegments", 0, 400).step(1).onChange(controls.redraw);
+  gui.add(controls, "tubularSegments", 1, 20).step(1).onChange(controls.redraw);
+  gui.add(controls, "p", 1, 10).step(1).onChange(controls.redraw);
+  gui.add(controls, "q", 1, 15).step(1).onChange(controls.redraw);
+  gui.add(controls, "heightScale", 0, 5).onChange(controls.redraw);
+  gui.add(controls, "asParticles").onChange(controls.redraw);
+  gui.add(controls, "rotate").onChange(controls.redraw);
+
+  gui.close();
+
+  controls.redraw();
+
+  render();
+
+  function generateSprite() {
+    let canvas = document.createElement("canvas");
+    canvas.width = 16;
+    canvas.height = 16;
+
+    let context = canvas.getContext("2d");
+    let gradient = context.createRadialGradient(
+      canvas.width / 2,
+      canvas.height / 2,
+      0,
+      canvas.width / 2,
+      canvas.height / 2,
+      canvas.width / 2
+    );
+    gradient.addColorStop(0, "rgba(255,255,255,1)");
+    gradient.addColorStop(0.2, "rgba(0,255,255,1)");
+    gradient.addColorStop(0.4, "rgba(0,0,64,1)");
+    gradient.addColorStop(1, "rgba(0,0,0,1)");
+
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    let texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
   }
 
-  raf() {
-    if (this.onRaf) {
-      window.requestAnimationFrame(() => {
-        const o = {};
-        o.time = window.performance.now() / 1000;
-        o.playhead = o.time % LOOP / LOOP;
-        this.raf();
-        this.onRaf(o);
-      });
+  function createParticleSystem(geom) {
+    let material = new THREE.ParticleBasicMaterial({
+      color: 0xffffff,
+      size: 3,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      map: generateSprite()
+    });
+
+    let system = new THREE.ParticleSystem(geom, material);
+    system.sortParticles = true;
+    return system;
+  }
+
+  function createMesh(geom) {
+    let meshMaterial = new THREE.MeshNormalMaterial({});
+    meshMaterial.side = THREE.DoubleSide;
+
+    let mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
+
+    return mesh;
+  }
+
+  function render() {
+    if (controls.rotate) {
+      knot.rotation.y = step += 0.00058;
     }
-  }}
 
-
-
-/*--------------------
-     Canvas
-     --------------------*/
-class Canvas extends Raf {
-  constructor(obj) {
-    super();
-    this.canvas = document.getElementById(obj.id);
-    this.ctx = this.canvas.getContext('2d');
-    this.resize();
-    this.events();
+    requestAnimationFrame(render);
+    webGLRenderer.render(scene, camera);
   }
-
-  resize() {
-    this.dpr = window.devicePixelRatio;
-    this.canvas.style.width = `${window.innerWidth}px`;
-    this.canvas.style.height = `${window.innerHeight}px`;
-    this.canvas.width = window.innerWidth * this.dpr;
-    this.canvas.height = window.innerHeight * this.dpr;
-  }
-
-  events() {
-    window.addEventListener('resize', this.resize);
-  }
-
-  clear() {
-    this.ctx.clearRect(0, 0, window.innerWidth * this.dpr, window.innerHeight * this.dpr);
-  }
-
-  onRaf() {
-    this.clear();
-  }}
-
-
-
-/*--------------------
-     Circle
-     --------------------*/
-class Circle extends Raf {
-  constructor(obj) {
-    super();
-    Object.assign(this, obj);
-    this.draw();
-  }
-
-  draw(playhead, time) {
-    const breathe = sin(playhead * TAO);
-    this.ctx.globalCompositeOperation = "screen";
-    this.ctx.save();
-    this.ctx.translate(window.innerWidth / 2 * this.dpr, window.innerHeight / 2 * this.dpr - 30 * this.dpr);
-    this.ctx.rotate(PI);
-
-    this.ctx.strokeStyle = this.color;
-    this.ctx.fillStyle = 'rgba(0, 100, 0, 0)';
-    this.ctx.lineWidth = this.lineWidth;
-    this.ctx.beginPath();
-
-    // this.radius *= 1 + Math.sin(Math.PI * 2 * playhead) * .5
-
-    for (let i = 0; i <= this.points; i++) {
-      const p = i / this.points;
-
-      const times = 7;
-
-      const phase = mapRange(cos(p * TAO), -1, 1, 1, mapRange(sin(((this.offset + time * this.speed) * .2 + p) * times * TAO), -1, 1, .5, .58));
-
-      let x = phase * this.radius * sin(p * TAO);
-      let y = phase * this.radius * cos(p * TAO);
-
-      const type = i === 0 ? 'moveTo' : 'lineTo';
-      this.ctx[type](x, y);
-    }
-
-    this.ctx.fill();
-    this.ctx.stroke();
-    this.ctx.beginPath();
-    this.ctx.fillStyle = this.color;
-    this.ctx.fill();
-    this.ctx.restore();
-  }
-
-  onRaf({ playhead, time }) {
-    this.draw(playhead, time);
-  }}
-
-
-
-
-
-/*--------------------
-     Init
-     --------------------*/
-const canvas = new Canvas({
-  id: 'canvas' });
-
-
-for (let i = 0; i < 8; i++) {
-  new Circle({
-    ctx: canvas.ctx,
-    dpr: canvas.dpr,
-    lineWidth: 1 * canvas.dpr,
-    points: 200,
-    offset: i * 1.5,
-    speed: .7,
-    radius: (150 - i * 4) * canvas.dpr,
-    color: `hsl(${220 + i * 10}, 60%, 70%)` });
-
 }
+main();
