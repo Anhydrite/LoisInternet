@@ -33,16 +33,13 @@
     Les lois d'internet
   </div>
   <div class="subTitle">
-    <p>Les limites de vitesse sont augmentes de 100 km/h supplementaires si la personne est sous l'effet de Cannabis</p>
-    <p>Esteban est une grosse salope</p>
-    <p>Les chinois ils sont tous moches c'est des versions ratées de nous</p>
-    <p>Si mon fils il est trizo il finira dans le frigo</p>
-    <p>Pas de quartier pour les pd</p>
-  </div>
-
+    <div class="container">
+      <div class="text"></div>
+    </div>
+    
+</div>
   
 
-  <div class="cursor"></div>
 </div>
 <!-- partial -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js'></script>
