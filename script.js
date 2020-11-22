@@ -251,13 +251,8 @@ class TextScramble {
 
 const phrases = [
 "Les limites de vitesse sont augmentes de 100 km/h supplementaires si la personne est sous l'effet de Cannabi",
-'Esteban est une grosse salope',
-"Les chinois ils sont tous moches c'est des versions ratées de nous",
-'Si mon fils il est trizo il finira dans le frigo',
-'Esteban a des hémoroïdes',
-"Grain de riz élu employé du mois",
 'Tombe de Valle77 XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD',
-'Pas de quartier pour les pd'];
+];
 
 
 const el = document.querySelector('.text');
