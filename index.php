@@ -13,7 +13,7 @@ header("Access-Control-Allow-Origin: *");
 <p id="demo"></p>
  
 <script>
-   header('Access-Control-Allow-Origin: *');  
+
     const options = {
   method: 'GET',
   mode: 'no-cors'
