@@ -3,6 +3,6 @@
 <script>
 $.get('https://www.cloudflare.com/cdn-cgi/trace', function(data) {
     console.log(data)
- https://bonjour.free.beeceptor.com
+
 })
 </script>
