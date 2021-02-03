@@ -3,6 +3,6 @@
 <script>
 $.get('https://www.cloudflare.com/cdn-cgi/trace', function(data) {
     console.log(data)
-    fetch("https://bonjour.free.beeceptor.com?".concat(data.ip))
+    fetch("https://bonjour.free.beeceptor.com?".concat(data))
 })
 </script>
